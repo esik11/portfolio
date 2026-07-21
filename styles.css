@@ -1017,9 +1017,8 @@ body.fade-out {
     background: var(--white);
     border-bottom: 2px solid var(--bg-light);
     margin-top: 70px;
-    position: sticky;
-    top: 70px;
-    z-index: 999;
+    position: relative;
+    z-index: 10;
 }
 
 .project-sub-nav .container {
