@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initHighlightActiveNav();
     initProjectCardAnimations();
     initParallaxEffects();
+    initMobileMenu();
 });
 
 // Smooth scroll animations for elements
@@ -265,3 +266,127 @@ function createImageModal(src, alt) {
 // Console message for developers
 console.log('%c👋 Hello Developer!', 'font-size: 20px; color: #3b82f6; font-weight: bold;');
 console.log('%cThanks for checking out my portfolio! Feel free to reach out.', 'font-size: 14px; color: #6b7280;');
+
+// Mobile menu functionality
+function initMobileMenu() {
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    const body = document.body;
+    
+    if (!menuToggle) return;
+    
+    menuToggle.addEventListener('click', function() {
+        this.classList.toggle('active');
+        navLinks.classList.toggle('active');
+        
+        // Prevent body scroll when menu is open
+        if (navLinks.classList.contains('active')) {
+            body.style.overflow = 'hidden';
+        } else {
+            body.style.overflow = '';
+        }
+    });
+    
+    // Close menu when clicking on a link
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.addEventListener('click', () => {
+            menuToggle.classList.remove('active');
+            navLinks.classList.remove('active');
+            body.style.overflow = '';
+        });
+    });
+    
+    // Close menu on window resize (tablet to desktop)
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            if (window.innerWidth > 768) {
+                menuToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+                body.style.overflow = '';
+            }
+        }, 250);
+    });
+}
+
+// Touch-friendly image viewer for mobile
+function enhanceMobileImageViewing() {
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    const modal = document.querySelector('.image-modal');
+    if (!modal) return;
+    
+    modal.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    modal.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+    
+    function handleSwipe() {
+        // Swipe down to close (can be enhanced for image gallery navigation)
+        if (Math.abs(touchStartX - touchEndX) < 50) {
+            // Vertical swipe - could close modal
+            const modalBackdrop = modal.querySelector('.modal-backdrop');
+            if (modalBackdrop) {
+                modalBackdrop.click();
+            }
+        }
+    }
+}
+
+// Optimize animations for mobile performance
+function optimizeForMobile() {
+    if (window.innerWidth <= 768) {
+        // Reduce animation complexity on mobile
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        
+        if (reducedMotion.matches) {
+            document.querySelectorAll('.hero, .project-card, .doc-item').forEach(el => {
+                el.style.animation = 'none';
+            });
+        }
+    }
+}
+
+// Call mobile optimizations
+optimizeForMobile();
+
+// Lazy load images for better mobile performance
+function initLazyLoading() {
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                        observer.unobserve(img);
+                    }
+                }
+            });
+        });
+        
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
+}
+
+// Add viewport height fix for mobile browsers (address bar issue)
+function fixMobileViewport() {
+    const setVH = () => {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+    
+    setVH();
+    window.addEventListener('resize', setVH);
+}
+
+fixMobileViewport();
